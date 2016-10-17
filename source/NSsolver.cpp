@@ -10,6 +10,7 @@
 #include"gridgen.h"
 #include"metric.h"
 #include"RHS.h"
+#include"BC.h"
 
 
 using namespace std;
