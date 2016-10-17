@@ -10,24 +10,24 @@
 #include"gridgen.h"
 #include"metric.h"
 #include"RHS.h"
-#include"BC.h"
+
 
 using namespace std;
 
 int main()
 {
 	
-	int N= 11;                          
-	double st=1; 			  
-	double Re=100;
-	double eps=0.01;                         
+	int N= 61;                          /*Grid size`*/
+	double st=1; 			  /*Stretching ratio, change this according to need*/
+	double Re=100; 		/*Reynolds number*/
+	double eps=0.01;   /*dissipation factor*/
+	double ep=0.01;		/*residual smoothing factor*/    
 	double L=30; /*Length of the domain*/
 	double t=0;
-	double t1=0.1;
-	double Etd=0;
-	double Es=0;
-	double Es_st=0;
-	double dt=0.005;
+	double t1=0.1;		/*Time duration, in seconds, for the study. Put time according to need or put a very large number for steady state problems*/
+	double dt=0.005;	/*Time step*/
+	double xmax=2*M_PI;	/* range of the grid in x-direction, change this according to the problem*/
+	double ymax=2*M_PI; /* range of the grid in y-direction, change this according to the problem*/
 	double** x; double**y; double** xvel; double** yvel; double** xvel1; double** yvel1; double** Press;
 	x=new double* [N];  y=new double* [N];  xvel=new double* [N];  yvel=new double* [N];  xvel1=new double* [N];  yvel1=new double* [N];  Press=new double* [N];		  	
 	for (int i = 0; i < N; ++i)
@@ -35,7 +35,7 @@ int main()
 		x[i]=new double [N];  y[i]=new double [N];  xvel[i]=new double [N];  yvel[i]=new double [N];  xvel1[i]=new double [N];  yvel1[i]=new double [N];  Press[i]=new double [N];		  	
 	}
 	double norms, sum, norm_diff[N][N];    
-	gridgen(N, st, x, y);  // Grid generation
+	gridgen(N, st, xmax, ymax, x, y);  // Grid generation
 	
 	
 	init( N, Re, t, t1, x, y, xvel, xvel1, yvel, yvel1, Press); 
@@ -124,7 +124,7 @@ int main()
 
 		 	/*Fourth order Runge-Kutta*/
 
-		    RHS(N,JC,u_k,v_k,Press,zx,ey,ex,zy,Re,eps,rcs,rus,rvs,rho1,rho2); 
+		    RHS(N,JC,u_k,v_k,Press,zx,ey,ex,zy,Re,eps,ep,rcs,rus,rvs,rho1,rho2); 
 		    
 		    for (int i =1; i<N-1; i++)			// First step of RK
 		    {    for (int j =1; j<N-1; j++)
@@ -133,14 +133,14 @@ int main()
 		            
 		    	    RHSv[i][j]=(((-3*v_k[i][j]+4*v_n[i][j]-v_old[i][j])/(2*dt))+rvs[i][j]);
 		    	    
-		            p_new[i][j]=Press[i][j]+0.25*(dtau[i][j]*rcs[i][j]);
-		            u_new[i][j]=u_k[i][j]+0.25*(dtau[i][j]*RHSu[i][j]);
-		            v_new[i][j]=v_k[i][j]+0.25*(dtau[i][j]*RHSv[i][j]);
+		            p_new1[i][j]=Press[i][j]+0.25*(dtau[i][j]*rcs[i][j]);
+		            u_new1[i][j]=u_k[i][j]+0.25*(dtau[i][j]*RHSu[i][j]);
+		            v_new1[i][j]=v_k[i][j]+0.25*(dtau[i][j]*RHSv[i][j]);
 		        }
 		    }
-		    BC(N,u_new,v_new,p_new);			// BC after first step RK
+		    BC(N,u_new1,v_new1,p_new1);			// BC after first step RK
 		    
-		    RHS(N,JC,u_new,v_new,p_new,zx,ey,ex,zy,Re,eps,rcs,rus,rvs,rho1,rho2); 
+		    RHS(N,JC,u_new1,v_new1,p_new1,zx,ey,ex,zy,Re,eps,ep,rcs,rus,rvs,rho1,rho2);  
 		    
 		    for (int i =1; i<N-1; i++)			// Second step of RK
 		    {
@@ -150,14 +150,14 @@ int main()
 		            
 		    	    RHSv11[i][j]=(((-3*v_k1[i][j]+4*v_n1[i][j]-v_old1[i][j])/(2*dt))+rvs[i][j]);
 		    	    
-		            p_new[i][j]=Press[i][j]+0.33*(dtau[i][j]*rcs[i][j]);
-		            u_new[i][j]=u_k[i][j]+0.33*(dtau[i][j]*RHSu11[i][j]);
-		            v_new[i][j]=v_k[i][j]+0.33*(dtau[i][j]*RHSv11[i][j]);
+		            p_new2[i][j]=Press[i][j]+0.33*(dtau[i][j]*rcs[i][j]);
+		            u_new2[i][j]=u_k[i][j]+0.33*(dtau[i][j]*RHSu11[i][j]);
+		            v_new2[i][j]=v_k[i][j]+0.33*(dtau[i][j]*RHSv11[i][j]);
 		        }
 		    }
-		    BC(N,u_new,v_new,p_new);			// BC after second step RK
+		    BC(N,u_new2,v_new2,p_new2);			// BC after second step RK
 		    
-		    RHS(N,JC,u_new,v_new,p_new,zx,ey,ex,zy,Re,eps,rcs,rus,rvs,rho1,rho2); 
+		    RHS(N,JC,u_new2,v_new2,p_new2,zx,ey,ex,zy,Re,eps,ep,rcs,rus,rvs,rho1,rho2); 
 		    
 		    for (int i =1; i<N-1; i++)			// Third step of RK
 		    {
@@ -167,14 +167,14 @@ int main()
 		            
 		    	    RHSv22[i][j]=(((-3*v_k2[i][j]+4*v_n2[i][j]-v_old2[i][j])/(2*dt))+rvs[i][j]);
 		    	    
-		            p_new[i][j]=Press[i][j]+0.5*(dtau[i][j]*rcs[i][j]);
-		            u_new[i][j]=u_k[i][j]+0.5*(dtau[i][j]*RHSu22[i][j]);
-		            v_new[i][j]=v_k[i][j]+0.5*(dtau[i][j]*RHSv22[i][j]);
+		            p_new3[i][j]=Press[i][j]+0.5*(dtau[i][j]*rcs[i][j]);
+		            u_new3[i][j]=u_k[i][j]+0.5*(dtau[i][j]*RHSu22[i][j]);
+		            v_new3[i][j]=v_k[i][j]+0.5*(dtau[i][j]*RHSv22[i][j]);
 		        }
 		    }
-		    BC(N,u_new,v_new,p_new);			// BC after third step RK
+		    BC(N,u_new3,v_new3,p_new3);			// BC after third step RK
 		    
-		    RHS(N,JC,u_new3,v_new3,p_new3,zx,ey,ex,zy,Re,eps,rcs,rus,rvs,rho1,rho2); 
+		    RHS(N,JC,u_new3,v_new3,p_new3,zx,ey,ex,zy,Re,eps,ep,rcs,rus,rvs,rho1,rho2); 
 		    
 		    for (int i =1; i<N-1; i++)			// Fourth step of RK
 		    {
@@ -231,37 +231,38 @@ int main()
 		}  	
     }
 
-    /* Writing Data to file */
-	    ofstream xout("xvel.csv");
+   /* Writing Data to file */
+	    ofstream xout("xvel.vtk");
+		xout<<"# vtk DataFile Version 2.0\nVTK from matlab\n"<<"ASCII\n"<<"DATASET STRUCTURED_POINTS\n"<<"DIMENSIONS "<<N<<" "<<N<<" "<<1<<"\nSPACING 1 1 1 \n"<<"ORIGIN 0 0 0\n"<<"POINT_DATA "<<N*N<<"\nSCALARS xvel float 1\n"<<"LOOKUP_TABLE default\n";
 		for (int i = 0; i < N; ++i)
 		{
 			for (int j = 0; j < N; ++j)
 			{
-				xout<<u_new[i][j]<<",";
+				xout<<u_new[i][j]<<" ";
 			}
-			xout<<endl;
 		}
 		
 		xout.close();
-		ofstream yout("yvel.csv");
+		
+		ofstream yout("yvel.vtk");
+		yout<<"# vtk DataFile Version 2.0\nVTK from matlab\n"<<"ASCII\n"<<"DATASET STRUCTURED_POINTS\n"<<"DIMENSIONS "<<N<<" "<<N<<" "<<1<<"\nSPACING 1 1 1 \n"<<"ORIGIN 0 0 0\n"<<"POINT_DATA "<<N*N<<"\nSCALARS yvel float 1\n"<<"LOOKUP_TABLE default\n";
 		for (int i = 0; i < N; ++i)
 		{
 			for (int j = 0; j < N; ++j)
 			{
-				yout<<v_new[i][j]<<",";
+				yout<<yvel[i][j]<<" ";
 			}
-			yout<<endl;
 		}
 		
 		yout.close();
-		ofstream pout("Press.csv");
+		ofstream pout("Press.vtk");
+		pout<<"# vtk DataFile Version 2.0\nVTK from matlab\n"<<"ASCII\n"<<"DATASET STRUCTURED_POINTS\n"<<"DIMENSIONS "<<N<<" "<<N<<" "<<1<<"\nSPACING 1 1 1 \n"<<"ORIGIN 0 0 0\n"<<"POINT_DATA "<<N*N<<"\nSCALARS Pressure float 1\n"<<"LOOKUP_TABLE default\n";
 		for (int i = 0; i < N; ++i)
 		{
 			for (int j = 0; j < N; ++j)
 			{
-				pout<<p_new[i][j]<<",";
+				pout<<p_new[i][j]<<" ";
 			}
-			pout<<endl;
 		}
 		
 		pout.close();

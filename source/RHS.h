@@ -1,9 +1,10 @@
 #include<math.h>
 #include"Diss.h"
 #include"spectralradius.h"
+#include"smoothing.h"
 
 
-void RHS(int N,double** JC,double** xvel,double** yvel,double** Press,double** zx,double** ey,double** ex,double** zy,double Re,double eps,double** rcs,double** rus,double** rvs, double** rho1, double** rho2)
+void RHS(int N,double** JC,double** xvel,double** yvel,double** Press,double** zx,double** ey,double** ex,double** zy,double Re,double eps,double ep,double** rcs,double** rus,double** rvs, double** rho1, double** rho2)
 {
    
     double** U;double** V; double** g11;double** g22;double** g12;double JChx[N][N], JChy[N][N], zxhx[N][N], zxhy[N][N], zyhx[N][N], zyhy[N][N], exhx[N][N], exhy[N][N], eyhx[N][N], eyhy[N][N], g11hx[N][N], g11hy[N][N], g12hx[N][N], g12hy[N][N], g22hx[N][N], g22hy[N][N], Estar1[N][N][3], Estar2[N][N][3], Estarv1[N][N][3], Estarv2[N][N][3], dEs1[N][N][3], dEs2[N][N][3], dEsv1[N][N][3], dEsv2[N][N][3];
@@ -14,11 +15,11 @@ void RHS(int N,double** JC,double** xvel,double** yvel,double** Press,double** z
     g22=new double* [N];
     for (int i = 0; i < N; ++i)
     {
-    	U[i]=new double [N];
-    	V[i]=new double [N];
-    	g11[i]=new double [N];
-	    g12[i]=new double [N];
-	    g22[i]=new double [N];
+        U[i]=new double [N];
+        V[i]=new double [N];
+        g11[i]=new double [N];
+        g12[i]=new double [N];
+        g22[i]=new double [N];
     }
     for (int i = 0; i < N; ++i)
     {
@@ -192,4 +193,5 @@ void RHS(int N,double** JC,double** xvel,double** yvel,double** Press,double** z
     }
     spectralradius(N, JC, U, V, g11, g22,  rho1,  rho2);
     Diss( N, eps, rho1, rho2, Press, xvel, yvel, rcs, rus, rvs);
+    smoothing( N, ep,  rcs,  rus,  rvs);
 }
