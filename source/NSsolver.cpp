@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include <math.h>
 #include <stdlib.h>
 #include <vector>
@@ -8,7 +7,7 @@
 #include "metric.h"
 #include "RHS.h"
 #include "BC.h"
-
+#include "contour.h"
 
 using namespace std;
 
@@ -90,8 +89,6 @@ int main()
 	vector<vector<double> > p_old1 (N,vector<double>(N, 0));
 	vector<vector<double> > p_old2 (N,vector<double>(N, 0));
 	vector<vector<double> > p_old3 (N,vector<double>(N, 0));
-
-	vector<vector<double> > dtau (N,vector<double>(N, 0));
 	vector<vector<double> > JC (N,vector<double>(N, 0));
 	vector<vector<double> > ex (N,vector<double>(N, 0));
 	vector<vector<double> > ey (N,vector<double>(N, 0));
@@ -115,52 +112,46 @@ int main()
 
 	metric( N, x, y,zx,zy,ex,ey,JC);   //Metric Calculation
 
-	for (int i=0; i<N; i++)  // Initializing all the velocity variables and dtau
-	{
-		for (int j=0; j<N; j++)
-		{
-		
-			u_new1[i][j]=xvel[i][j];
-			u_new2[i][j]=xvel[i][j];
-			u_new3[i][j]=xvel[i][j];
-			u_new[i][j]=xvel[i][j];
-			u_k1[i][j]=xvel[i][j];
-			u_k2[i][j]=xvel[i][j];
-			u_k3[i][j]=xvel[i][j];
-			u_k[i][j]=xvel[i][j];
-			u_n1[i][j]=xvel[i][j];
-			u_n2[i][j]=xvel[i][j];
-			u_n3[i][j]=xvel[i][j];
-			u_n[i][j]=xvel[i][j];
-			u_old1[i][j]=xvel[i][j];
-			u_old2[i][j]=xvel[i][j];
-			u_old3[i][j]=xvel[i][j];
-			u_old[i][j]=xvel[i][j];
-			v_new1[i][j]=yvel[i][j];
-			v_new2[i][j]=yvel[i][j];
-			v_new3[i][j]=yvel[i][j];
-			v_new[i][j]=yvel[i][j];
-			v_k1[i][j]=yvel[i][j];
-			v_k2[i][j]=yvel[i][j];
-			v_k3[i][j]=yvel[i][j];
-			v_k[i][j]=yvel[i][j];
-			v_n1[i][j]=yvel[i][j];
-			v_n2[i][j]=yvel[i][j];
-			v_n3[i][j]=yvel[i][j];
-			v_n[i][j]=yvel[i][j];
-			v_old1[i][j]=yvel[i][j];
-			v_old2[i][j]=yvel[i][j];
-			v_old3[i][j]=yvel[i][j];
-			v_old[i][j]=yvel[i][j];
-			p_new1[i][j]=Press[i][j];
-			p_new2[i][j]=Press[i][j];
-			p_new3[i][j]=Press[i][j];
-			p_new[i][j]=Press[i][j];
-			p_n[i][j]=Press[i][j];
-		    dtau[i][j]=0.00005;
-		    	
-		}
-	}
+	// Initializing all the velocity variables and dtau
+	u_new1=xvel;
+	u_new2=xvel;
+	u_new3=xvel;
+	u_new=xvel;
+	u_k1=xvel;
+	u_k2=xvel;
+	u_k3=xvel;
+	u_k=xvel;
+	u_n1=xvel;
+	u_n2=xvel;
+	u_n3=xvel;
+	u_n=xvel;
+	u_old1=xvel;
+	u_old2=xvel;
+	u_old3=xvel;
+	u_old=xvel;
+	v_new1=yvel;
+	v_new2=yvel;
+	v_new3=yvel;
+	v_new=yvel;
+	v_k1=yvel;
+	v_k2=yvel;
+	v_k3=yvel;
+	v_k=yvel;
+	v_n1=yvel;
+	v_n2=yvel;
+	v_n3=yvel;
+	v_n=yvel;
+	v_old1=yvel;
+	v_old2=yvel;
+	v_old3=yvel;
+	v_old=yvel;
+	p_new1=Press;
+	p_new2=Press;
+	p_new3=Press;
+	p_new=Press;
+	p_n=Press;
+	double dtau=0.00005;
+
 	double dj=1;
 
     for(double ti=0; ti<t1;ti+=dt)
@@ -182,9 +173,9 @@ int main()
 		            
 		    	    RHSv[i][j]=(((-3*v_k[i][j]+4*v_n[i][j]-v_old[i][j])/(2*dt))+rvs[i][j]);
 		    	    
-		            p_new1[i][j]=Press[i][j]+0.25*(dtau[i][j]*rcs[i][j]);
-		            u_new1[i][j]=u_k[i][j]+0.25*(dtau[i][j]*RHSu[i][j]);
-		            v_new1[i][j]=v_k[i][j]+0.25*(dtau[i][j]*RHSv[i][j]);
+		            p_new1[i][j]=Press[i][j]+0.25*(dtau*rcs[i][j]);
+		            u_new1[i][j]=u_k[i][j]+0.25*(dtau*RHSu[i][j]);
+		            v_new1[i][j]=v_k[i][j]+0.25*(dtau*RHSv[i][j]);
 		        }
 		    }
 		    BC(N,u_new1,v_new1,p_new1);			// BC after first step RK
@@ -199,9 +190,9 @@ int main()
 		            
 		    	    RHSv11[i][j]=(((-3*v_k1[i][j]+4*v_n1[i][j]-v_old1[i][j])/(2*dt))+rvs[i][j]);
 		    	    
-		            p_new2[i][j]=Press[i][j]+0.33*(dtau[i][j]*rcs[i][j]);
-		            u_new2[i][j]=u_k[i][j]+0.33*(dtau[i][j]*RHSu11[i][j]);
-		            v_new2[i][j]=v_k[i][j]+0.33*(dtau[i][j]*RHSv11[i][j]);
+		            p_new2[i][j]=Press[i][j]+0.33*(dtau*rcs[i][j]);
+		            u_new2[i][j]=u_k[i][j]+0.33*(dtau*RHSu11[i][j]);
+		            v_new2[i][j]=v_k[i][j]+0.33*(dtau*RHSv11[i][j]);
 		        }
 		    }
 		    BC(N,u_new2,v_new2,p_new2);			// BC after second step RK
@@ -216,9 +207,9 @@ int main()
 		            
 		    	    RHSv22[i][j]=(((-3*v_k2[i][j]+4*v_n2[i][j]-v_old2[i][j])/(2*dt))+rvs[i][j]);
 		    	    
-		            p_new3[i][j]=Press[i][j]+0.5*(dtau[i][j]*rcs[i][j]);
-		            u_new3[i][j]=u_k[i][j]+0.5*(dtau[i][j]*RHSu22[i][j]);
-		            v_new3[i][j]=v_k[i][j]+0.5*(dtau[i][j]*RHSv22[i][j]);
+		            p_new3[i][j]=Press[i][j]+0.5*(dtau*rcs[i][j]);
+		            u_new3[i][j]=u_k[i][j]+0.5*(dtau*RHSu22[i][j]);
+		            v_new3[i][j]=v_k[i][j]+0.5*(dtau*RHSv22[i][j]);
 		        }
 		    }
 		    BC(N,u_new3,v_new3,p_new3);			// BC after third step RK
@@ -233,84 +224,50 @@ int main()
 		            
 		    	    RHSv33[i][j]=(((-3*v_k3[i][j]+4*v_n3[i][j]-v_old3[i][j])/(2*dt))+rvs[i][j]);
 		            
-		            p_new[i][j]=Press[i][j]+(dtau[i][j]*rcs[i][j]);
-		            u_new[i][j]=u_k[i][j]+(dtau[i][j]*RHSu33[i][j]);
-		            v_new[i][j]=v_k[i][j]+(dtau[i][j]*RHSv33[i][j]);
+		            p_new[i][j]=Press[i][j]+(dtau*rcs[i][j]);
+		            u_new[i][j]=u_k[i][j]+(dtau*RHSu33[i][j]);
+		            v_new[i][j]=v_k[i][j]+(dtau*RHSv33[i][j]);
 		        }
 		    }
 		    BC(N,u_new,v_new,p_new);			// BC after fourth step RK`
 
 		   
-		     for (int i =0; i<N; i++)			// Updating old values
-		    {
-		        for (int j =0; j<N; j++)
-		        { 
-				    u_old1[i][j]=u_n1[i][j];
-				    u_n1[i][j]=u_k1[i][j];
-				    u_k1[i][j]=u_new1[i][j];
-				    u_old2[i][j]=u_n2[i][j];
-				    u_n2[i][j]=u_k2[i][j];
-				    u_k2[i][j]=u_new2[i][j];
-				    u_old3[i][j]=u_n3[i][j];
-				    u_n3[i][j]=u_k3[i][j];
-				    u_k3[i][j]=u_new3[i][j];
-				    u_old[i][j]=u_n[i][j];
-				    u_n[i][j]=u_k[i][j];
-				    u_k[i][j]=u_new[i][j];
-				    v_old1[i][j]=v_n1[i][j];
-				    v_n1[i][j]=v_k1[i][j];
-				    v_k1[i][j]=v_new1[i][j];
-				    v_old2[i][j]=v_n2[i][j];
-				    v_n2[i][j]=v_k2[i][j];
-				    v_k2[i][j]=v_new2[i][j];
-				    v_old3[i][j]=v_n3[i][j];
-				    v_n3[i][j]=v_k3[i][j];
-				    v_k3[i][j]=v_new3[i][j];
-				    v_old[i][j]=v_n[i][j];
-				    v_n[i][j]=v_k[i][j];
-				    v_k[i][j]=v_new[i][j];		    
-				    Press[i][j]=p_new[i][j];
-			  }
-		    } 		   
+		    // Updating old values
+     
+		    u_old1=u_n1;
+		    u_n1=u_k1;
+		    u_k1=u_new1;
+		    u_old2=u_n2;
+		    u_n2=u_k2;
+		    u_k2=u_new2;
+		    u_old3=u_n3;
+		    u_n3=u_k3;
+		    u_k3=u_new3;
+		    u_old=u_n;
+		    u_n=u_k;
+		    u_k=u_new;
+		    v_old1=v_n1;
+		    v_n1=v_k1;
+		    v_k1=v_new1;
+		    v_old2=v_n2;
+		    v_n2=v_k2;
+		    v_k2=v_new2;
+		    v_old3=v_n3;
+		    v_n3=v_k3;
+		    v_k3=v_new3;
+		    v_old=v_n;
+		    v_n=v_k;
+		    v_k=v_new;		    
+		    Press=p_new;
+			 		   
 		    
 		    
 		}  	
     }
 
-   /* Writing Data to file */
-	    ofstream xout("xvel.vtk");
-		xout<<"# vtk DataFile Version 2.0\nVTK from matlab\n"<<"ASCII\n"<<"DATASET STRUCTURED_POINTS\n"<<"DIMENSIONS "<<N<<" "<<N<<" "<<1<<"\nSPACING 1 1 1 \n"<<"ORIGIN 0 0 0\n"<<"POINT_DATA "<<N*N<<"\nSCALARS xvel float 1\n"<<"LOOKUP_TABLE default\n";
-		for (int i = 0; i < N; ++i)
-		{
-			for (int j = 0; j < N; ++j)
-			{
-				xout<<u_new[i][j]<<" ";
-			}
-		}
-		
-		xout.close();
-		
-		ofstream yout("yvel.vtk");
-		yout<<"# vtk DataFile Version 2.0\nVTK from matlab\n"<<"ASCII\n"<<"DATASET STRUCTURED_POINTS\n"<<"DIMENSIONS "<<N<<" "<<N<<" "<<1<<"\nSPACING 1 1 1 \n"<<"ORIGIN 0 0 0\n"<<"POINT_DATA "<<N*N<<"\nSCALARS yvel float 1\n"<<"LOOKUP_TABLE default\n";
-		for (int i = 0; i < N; ++i)
-		{
-			for (int j = 0; j < N; ++j)
-			{
-				yout<<yvel[i][j]<<" ";
-			}
-		}
-		
-		yout.close();
-		ofstream pout("Press.vtk");
-		pout<<"# vtk DataFile Version 2.0\nVTK from matlab\n"<<"ASCII\n"<<"DATASET STRUCTURED_POINTS\n"<<"DIMENSIONS "<<N<<" "<<N<<" "<<1<<"\nSPACING 1 1 1 \n"<<"ORIGIN 0 0 0\n"<<"POINT_DATA "<<N*N<<"\nSCALARS Pressure float 1\n"<<"LOOKUP_TABLE default\n";
-		for (int i = 0; i < N; ++i)
-		{
-			for (int j = 0; j < N; ++j)
-			{
-				pout<<p_new[i][j]<<" ";
-			}
-		}
-		
-		pout.close();
-	    return 0;
+   	/* Writing Data to file */
+    contour(u_new,N,"xvel.vtk","U");
+    contour(v_new,N,"yvel.vtk","V");
+    contour(p_new,N,"Press.vtk","P");
+	return 0;
 }

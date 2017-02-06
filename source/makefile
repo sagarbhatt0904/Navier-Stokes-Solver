@@ -1,3 +1,3 @@
 all:
 
-	g++ NSsolver.cpp -o result
+	g++ -O2 NSsolver.cpp -o result

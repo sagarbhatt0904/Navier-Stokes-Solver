@@ -8,29 +8,12 @@ void smoothing(int N, double ep, vector<vector<double> > &rcs, vector<vector<dou
     vector<vector<double> > Dummyv (N,vector<double>(N, 0));
     vector<vector<double> > Dummyc (N,vector<double>(N, 0));
     
-    vector<double> a(N);
-    vector<double> b(N);
-    vector<double> c(N);
-    vector<double> du(N);
-    vector<double> dv(N);
-    vector<double> dc(N);
-
-
-    for (int i = 0; i < N; ++i)
-    {
-        a[i]=0;
-        b[i]=0;
-        c[i]=0;
-        dc[i]=0;
-        du[i]=0;
-        dv[i]=0;
-        for (int j = 0; j < N; ++j)
-        {
-            Dummyc[i][j]=0;
-            Dummyu[i][j]=0;
-            Dummyv[i][j]=0;            
-        }
-    }
+    vector<double> a(N,0);
+    vector<double> b(N,0);
+    vector<double> c(N,0);
+    vector<double> du(N,0);
+    vector<double> dv(N,0);
+    vector<double> dc(N,0);
    
     a[0]=0;
     b[0]=1+2*ep;

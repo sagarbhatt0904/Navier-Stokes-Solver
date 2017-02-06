@@ -19,11 +19,6 @@ void RHS(int N,vector<vector<double> > &JC,vector<vector<double> > &xvel,vector<
     {
         for (int j = 0; j  < N; ++j)
         {
-            U[i][j]=0;
-            V[i][j]=0;
-            g11[i][j]=0;
-            g12[i][j]=0;
-            g22[i][j]=0;
             rcs[i][j]=0;
             rus[i][j]=0;
             rvs[i][j]=0;
